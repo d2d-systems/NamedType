@@ -20,6 +20,24 @@
 #   define IGNORE_SHOULD_RETURN_REFERENCE_TO_THIS_END   /* Nothing */
 #endif
 
+#if defined(FLUENT_NODISCARD)
+#error FLUENT_NODISCARD already defined
+#endif
+
+#if (__cplusplus >= 201703L) && !defined(_MSVC_LANG)
+#if defined(__has_cpp_attribute) && (__has_cpp_attribute(nodiscard) >= 201603L)
+#define FLUENT_NODISCARD [[nodiscard]]
+#endif
+#endif
+
+#if defined(_MSVC_LANG) && (_MSVC_LANG>=201703L)
+#define FLUENT_NODISCARD [[nodiscard]]
+#endif
+
+#if !defined(FLUENT_NODISCARD)
+#define FLUENT_NODISCARD
+#endif
+
 namespace fluent
 {
 
@@ -48,17 +66,6 @@ public:
     {
     }
 
-    // get
-    [[nodiscard]] constexpr T& get() noexcept
-    {
-        return value_;
-    }
-
-    [[nodiscard]] constexpr T const& get() const noexcept
-    {
-        return value_;
-    }
-
     // conversions
     using ref = NamedType<T&, Parameter, Skills...>;
     operator ref()
@@ -84,6 +91,17 @@ public:
         argument& operator=(argument const&) = delete;
         argument& operator=(argument&&) = delete;
     };
+
+    // get
+    FLUENT_NODISCARD constexpr T& get() noexcept
+    {
+        return value_;
+    }
+
+    FLUENT_NODISCARD constexpr T const& get() const noexcept
+    {
+        return value_;
+    }
 
 private:
     T value_{};
